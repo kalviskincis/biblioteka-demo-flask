@@ -6,6 +6,7 @@ import iespieddarbi
 import mekletajs
 import lietotaji
 import lasitava
+import validacija
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "Biblioteka2023!"
@@ -54,12 +55,15 @@ def pieslegties():
         pers_kods = request.form.get("pers_kods")
         parole = request.form.get("parole")
 
-        print(pers_kods, parole
-              )
-        if lietotaji.parbaude(pers_kods, parole):
-            return render_template("darbinieka_landing_page.html")
+        if validacija.personas_kods(pers_kods) and validacija.teksts(parole):
+
+            if lietotaji.parbaude(pers_kods, parole):
+                return render_template("darbinieka_landing_page.html")
+            else:
+                flash("Pieteikšanās neveiksmīga")
+
         else:
-            flash("Pieteikšanās neveiksmīga")
+            flash("Kļūda ievades datos. Vai nu personas kods neatbilst formātam vai paroles lauks ir tukšs")
 
     return render_template("pieslegties.html")
 
@@ -75,8 +79,8 @@ def pievienot_lasitaju():
         parole = request.form["parole"]
         datums = datetime.now().date()
 
-        if vards == "" or uzvards == "" or personas_kods == "" or talrunis == "":
-            flash('Nav aizpildīti lietotāja pievienošanai nepieciešamie lauki.')
+        if vards == "" or uzvards == "" or personas_kods == "" or talrunis == "" or validacija.personas_kods(personas_kods) == False or validacija.talrunis(talrunis) == False:
+            flash('Nav aizpildīti lietotāja pievienošanai nepieciešamie lauki vai tie aizpildīti nekorekti.')
 
         else:
             if kategorija == "lasītājs":
